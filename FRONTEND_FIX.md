@@ -45,6 +45,13 @@ The event listeners were being set up in `init()` before the map image loaded an
 - Used `stroke-width` and `filter: brightness()` for subtle hover feedback
 - Markers now stay in place when hovering and are easier to click
 
+### 5. Added Sidebar Placeholder (`public/js/map-display.js` & `public/css/map-display.css`)
+- Added placeholder content for side layout to prevent map from shifting when location is clicked
+- Placeholder shows a location icon and "Click on a location to view details" message
+- Sidebar now maintains consistent width whether showing placeholder or location content
+- Popup layout still hides/shows as before (no placeholder needed)
+- Improves user experience by keeping the map stable
+
 ## How It Works Now
 
 1. Scripts are registered early (priority 5)

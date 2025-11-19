@@ -99,10 +99,27 @@ class InteractiveMap {
 
     mapWrapper.appendChild(mapImage);
 
-    // Create content panel
+    // Create content panel with placeholder
     this.contentPanel = document.createElement('div');
     this.contentPanel.className = `wim-content-panel wim-layout-${this.options.layout}`;
-    this.contentPanel.style.display = 'none';
+    
+    // Add placeholder content for side layout
+    if (this.options.layout === 'side') {
+      this.contentPanel.innerHTML = `
+        <div class="wim-content-placeholder">
+          <div class="wim-placeholder-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+          </div>
+          <p class="wim-placeholder-text">Click on a location to view details</p>
+        </div>
+      `;
+    } else {
+      // For popup layout, keep it hidden initially
+      this.contentPanel.style.display = 'none';
+    }
 
     // Clear container and add elements
     this.container.innerHTML = '';
@@ -336,7 +353,11 @@ class InteractiveMap {
     contentHTML += '</div>';
 
     this.contentPanel.innerHTML = contentHTML;
-    this.contentPanel.style.display = 'block';
+    
+    // Only change display for popup layout
+    if (this.options.layout === 'popup') {
+      this.contentPanel.style.display = 'block';
+    }
 
     // Add close button handler
     const closeButton = this.contentPanel.querySelector('.wim-close-button');
@@ -355,8 +376,24 @@ class InteractiveMap {
    */
   closeLocationContent() {
     if (this.contentPanel) {
-      this.contentPanel.style.display = 'none';
-      this.contentPanel.innerHTML = '';
+      if (this.options.layout === 'side') {
+        // Show placeholder again for side layout
+        this.contentPanel.innerHTML = `
+          <div class="wim-content-placeholder">
+            <div class="wim-placeholder-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+            </div>
+            <p class="wim-placeholder-text">Click on a location to view details</p>
+          </div>
+        `;
+      } else {
+        // Hide for popup layout
+        this.contentPanel.style.display = 'none';
+        this.contentPanel.innerHTML = '';
+      }
     }
 
     this.activeLocation = null;
