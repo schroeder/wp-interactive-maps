@@ -101,14 +101,6 @@ class WIM_Meta_Boxes {
             return;
         }
 
-        // Enqueue admin styles
-        wp_enqueue_style(
-            'wim-admin-styles',
-            plugin_dir_url( dirname( __FILE__ ) ) . 'admin/css/admin-styles.css',
-            array(),
-            '1.0.0'
-        );
-
         // Enqueue WordPress media uploader
         wp_enqueue_media();
 
@@ -116,32 +108,353 @@ class WIM_Meta_Boxes {
         wp_enqueue_style( 'wp-color-picker' );
         wp_enqueue_script( 'wp-color-picker' );
 
-        // Enqueue map editor script
-        wp_enqueue_script(
-            'wim-map-editor',
-            plugin_dir_url( dirname( __FILE__ ) ) . 'admin/js/map-editor.js',
-            array( 'jquery' ),
-            '1.0.0',
-            true
-        );
+        // Add inline styles
+        add_action( 'admin_footer', array( $this, 'output_inline_map_editor_styles' ) );
+        
+        // Add inline script
+        add_action( 'admin_footer', array( $this, 'output_inline_map_editor_script' ) );
+    }
+    
+    /**
+     * Output inline styles for map editor
+     */
+    public function output_inline_map_editor_styles() {
+        ?>
+        <style>
+        #wim-map-editor-container {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 15px;
+            background: #f9f9f9;
+        }
+        #wim-map-editor-wrapper {
+            position: relative;
+            display: inline-block;
+            max-width: 100%;
+        }
+        #wim-map-editor-image {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            cursor: crosshair;
+        }
+        #wim-map-editor-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        #wim-polygon-controls {
+            margin-top: 10px;
+        }
+        </style>
+        <?php
+    }
+    
+    /**
+     * Output inline script for map editor
+     */
+    public function output_inline_map_editor_script() {
+        $ajax_url = admin_url( 'admin-ajax.php' );
+        $nonce = wp_create_nonce( 'wim_map_editor' );
+        ?>
+        <script type="text/javascript">
+        jQuery(document).ready(function($) {
+            var MapEditor = {
+                mapId: null,
+                mapImageUrl: null,
+                mapWidth: null,
+                mapHeight: null,
+                locationType: 'place',
+                polygonPoints: [],
+                isDrawing: false,
 
-        // Localize script with translations and AJAX URL
-        wp_localize_script(
-            'wim-map-editor',
-            'wimMapEditor',
-            array(
-                'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-                'nonce' => wp_create_nonce( 'wim_map_editor' ),
-                'i18n' => array(
-                    'visualEditor' => __( 'Visual Map Editor', 'wp-interactive-maps' ),
-                    'clickToSetPlace' => __( 'Click on the map to set the place coordinates.', 'wp-interactive-maps' ),
-                    'clickToDrawArea' => __( 'Click on the map to draw polygon points. Click "Finish" when done.', 'wp-interactive-maps' ),
-                    'clearPolygon' => __( 'Clear Polygon', 'wp-interactive-maps' ),
-                    'finishPolygon' => __( 'Finish Polygon', 'wp-interactive-maps' ),
-                    'minThreePoints' => __( 'A polygon must have at least 3 points.', 'wp-interactive-maps' ),
-                ),
-            )
-        );
+                init: function() {
+                    console.log('WIM Map Editor: Initializing...');
+                    this.bindEvents();
+                    this.loadMapImage();
+                },
+
+                bindEvents: function() {
+                    var self = this;
+                    
+                    $('#wim_location_map_id').on('change', function() {
+                        console.log('WIM Map Editor: Map selection changed to:', $(this).val());
+                        self.loadMapImage();
+                    });
+
+                    $('input[name="wim_location_type"]').on('change', function() {
+                        self.locationType = $(this).val();
+                        self.resetEditor();
+                    });
+
+                    $(document).on('click', '#wim-map-editor-image', function(e) {
+                        self.handleMapClick(e);
+                    });
+
+                    $(document).on('click', '#wim-clear-polygon', function(e) {
+                        e.preventDefault();
+                        self.clearPolygon();
+                    });
+
+                    $(document).on('click', '#wim-finish-polygon', function(e) {
+                        e.preventDefault();
+                        self.finishPolygon();
+                    });
+                },
+
+                loadMapImage: function() {
+                    var self = this;
+                    var mapId = $('#wim_location_map_id').val();
+
+                    if (!mapId) {
+                        this.hideMapEditor();
+                        return;
+                    }
+
+                    $.ajax({
+                        url: '<?php echo esc_js( $ajax_url ); ?>',
+                        type: 'POST',
+                        data: {
+                            action: 'wim_get_map_data',
+                            map_id: mapId,
+                            nonce: '<?php echo esc_js( $nonce ); ?>'
+                        },
+                        success: function(response) {
+                            console.log('AJAX response:', response);
+                            if (response.success && response.data) {
+                                self.mapId = mapId;
+                                self.mapImageUrl = response.data.image_url;
+                                self.mapWidth = response.data.width;
+                                self.mapHeight = response.data.height;
+                                self.renderMapEditor();
+                            } else {
+                                console.error('Map data error:', response);
+                                self.hideMapEditor();
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('AJAX error:', status, error, xhr.responseText);
+                            self.hideMapEditor();
+                        }
+                    });
+                },
+
+                renderMapEditor: function() {
+                    var self = this;
+                    var editorHtml = '<div id="wim-map-editor-container">';
+                    editorHtml += '<h4><?php echo esc_js( __( 'Visual Map Editor', 'wp-interactive-maps' ) ); ?></h4>';
+                    editorHtml += '<p class="description">' + this.getInstructionText() + '</p>';
+                    editorHtml += '<div id="wim-map-editor-wrapper">';
+                    editorHtml += '<img id="wim-map-editor-image" src="' + this.mapImageUrl + '" />';
+                    editorHtml += '<svg id="wim-map-editor-svg"></svg>';
+                    editorHtml += '</div>';
+
+                    if (this.locationType === 'area') {
+                        editorHtml += '<div id="wim-polygon-controls">';
+                        editorHtml += '<button type="button" id="wim-clear-polygon" class="button"><?php echo esc_js( __( 'Clear Polygon', 'wp-interactive-maps' ) ); ?></button> ';
+                        editorHtml += '<button type="button" id="wim-finish-polygon" class="button button-primary"><?php echo esc_js( __( 'Finish Polygon', 'wp-interactive-maps' ) ); ?></button>';
+                        editorHtml += '</div>';
+                    }
+
+                    editorHtml += '</div>';
+
+                    $('#wim-map-editor-container').remove();
+
+                    if (this.locationType === 'place') {
+                        $('#wim-place-coordinates').after(editorHtml);
+                    } else {
+                        $('#wim-area-coordinates').after(editorHtml);
+                    }
+
+                    this.loadExistingCoordinates();
+                },
+
+                getInstructionText: function() {
+                    if (this.locationType === 'place') {
+                        return '<?php echo esc_js( __( 'Click on the map to set the place coordinates.', 'wp-interactive-maps' ) ); ?>';
+                    } else {
+                        return '<?php echo esc_js( __( 'Click on the map to draw polygon points. Click "Finish" when done.', 'wp-interactive-maps' ) ); ?>';
+                    }
+                },
+
+                hideMapEditor: function() {
+                    $('#wim-map-editor-container').remove();
+                },
+
+                resetEditor: function() {
+                    this.polygonPoints = [];
+                    this.isDrawing = false;
+                    if (this.mapId) {
+                        this.renderMapEditor();
+                    }
+                },
+
+                handleMapClick: function(e) {
+                    var $img = $('#wim-map-editor-image');
+                    var offset = $img.offset();
+                    var x = e.pageX - offset.left;
+                    var y = e.pageY - offset.top;
+
+                    var scaleX = this.mapWidth / $img.width();
+                    var scaleY = this.mapHeight / $img.height();
+                    var actualX = Math.round(x * scaleX);
+                    var actualY = Math.round(y * scaleY);
+
+                    if (this.locationType === 'place') {
+                        this.setPlaceCoordinates(actualX, actualY);
+                        this.renderPlaceMarker(x, y);
+                    } else {
+                        this.addPolygonPoint(actualX, actualY, x, y);
+                    }
+                },
+
+                setPlaceCoordinates: function(x, y) {
+                    $('#wim_place_x').val(x);
+                    $('#wim_place_y').val(y);
+                },
+
+                renderPlaceMarker: function(x, y) {
+                    var svg = document.getElementById('wim-map-editor-svg');
+                    svg.innerHTML = '';
+
+                    var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    circle.setAttribute('cx', x);
+                    circle.setAttribute('cy', y);
+                    circle.setAttribute('r', '8');
+                    circle.setAttribute('fill', '#ff6600');
+                    circle.setAttribute('stroke', '#fff');
+                    circle.setAttribute('stroke-width', '2');
+                    svg.appendChild(circle);
+                },
+
+                addPolygonPoint: function(actualX, actualY, displayX, displayY) {
+                    this.polygonPoints.push({
+                        actual: [actualX, actualY],
+                        display: [displayX, displayY]
+                    });
+                    this.isDrawing = true;
+                    this.renderPolygon();
+                    this.updatePolygonField();
+                },
+
+                renderPolygon: function() {
+                    var svg = document.getElementById('wim-map-editor-svg');
+                    svg.innerHTML = '';
+
+                    if (this.polygonPoints.length === 0) return;
+
+                    for (var i = 0; i < this.polygonPoints.length; i++) {
+                        var point = this.polygonPoints[i].display;
+                        
+                        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                        circle.setAttribute('cx', point[0]);
+                        circle.setAttribute('cy', point[1]);
+                        circle.setAttribute('r', '5');
+                        circle.setAttribute('fill', '#ff6600');
+                        circle.setAttribute('stroke', '#fff');
+                        circle.setAttribute('stroke-width', '2');
+                        svg.appendChild(circle);
+
+                        if (i < this.polygonPoints.length - 1) {
+                            var nextPoint = this.polygonPoints[i + 1].display;
+                            var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                            line.setAttribute('x1', point[0]);
+                            line.setAttribute('y1', point[1]);
+                            line.setAttribute('x2', nextPoint[0]);
+                            line.setAttribute('y2', nextPoint[1]);
+                            line.setAttribute('stroke', '#ff6600');
+                            line.setAttribute('stroke-width', '2');
+                            svg.appendChild(line);
+                        }
+                    }
+
+                    if (this.polygonPoints.length >= 3 && !this.isDrawing) {
+                        var points = this.polygonPoints.map(function(p) {
+                            return p.display[0] + ',' + p.display[1];
+                        }).join(' ');
+
+                        var polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                        polygon.setAttribute('points', points);
+                        polygon.setAttribute('fill', 'rgba(255, 102, 0, 0.3)');
+                        polygon.setAttribute('stroke', '#ff6600');
+                        polygon.setAttribute('stroke-width', '2');
+                        svg.insertBefore(polygon, svg.firstChild);
+                    }
+                },
+
+                updatePolygonField: function() {
+                    var actualPoints = this.polygonPoints.map(function(p) {
+                        return p.actual;
+                    });
+                    $('#wim_area_points').val(JSON.stringify(actualPoints));
+                },
+
+                clearPolygon: function() {
+                    this.polygonPoints = [];
+                    this.isDrawing = true;
+                    this.renderPolygon();
+                    $('#wim_area_points').val('');
+                },
+
+                finishPolygon: function() {
+                    if (this.polygonPoints.length < 3) {
+                        alert('<?php echo esc_js( __( 'A polygon must have at least 3 points.', 'wp-interactive-maps' ) ); ?>');
+                        return;
+                    }
+                    this.isDrawing = false;
+                    this.renderPolygon();
+                },
+
+                loadExistingCoordinates: function() {
+                    var self = this;
+                    if (this.locationType === 'place') {
+                        var x = $('#wim_place_x').val();
+                        var y = $('#wim_place_y').val();
+                        if (x && y) {
+                            var $img = $('#wim-map-editor-image');
+                            var scaleX = $img.width() / this.mapWidth;
+                            var scaleY = $img.height() / this.mapHeight;
+                            var displayX = parseFloat(x) * scaleX;
+                            var displayY = parseFloat(y) * scaleY;
+                            this.renderPlaceMarker(displayX, displayY);
+                        }
+                    } else {
+                        var pointsJson = $('#wim_area_points').val();
+                        if (pointsJson) {
+                            try {
+                                var actualPoints = JSON.parse(pointsJson);
+                                if (Array.isArray(actualPoints) && actualPoints.length > 0) {
+                                    var $img = $('#wim-map-editor-image');
+                                    var scaleX = $img.width() / this.mapWidth;
+                                    var scaleY = $img.height() / this.mapHeight;
+                                    this.polygonPoints = actualPoints.map(function(point) {
+                                        return {
+                                            actual: point,
+                                            display: [point[0] * scaleX, point[1] * scaleY]
+                                        };
+                                    });
+                                    this.isDrawing = false;
+                                    this.renderPolygon();
+                                }
+                            } catch (e) {
+                                console.error('Error parsing polygon points:', e);
+                            }
+                        }
+                    }
+                }
+            };
+
+            if ($('#wim_location_map_id').length) {
+                MapEditor.init();
+            } else {
+                console.log('WIM Map Editor: Map select field not found');
+            }
+        });
+        </script>
+        <?php
     }
 
     /**
