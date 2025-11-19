@@ -128,7 +128,7 @@ class WIM_Shortcode {
             'wim-map-display',
             'wimData',
             array(
-                'restUrl' => rest_url( 'wim/v1/' ),
+                'restUrl' => rest_url( 'wim/v1' ),
                 'nonce'   => wp_create_nonce( 'wp_rest' ),
             )
         );

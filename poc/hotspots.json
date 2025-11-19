@@ -1,0 +1,24 @@
+[
+    {
+      "id": "hotspot1",
+      "title": "Hauptgebäude",
+      "text": "Dies ist das zentrale Verwaltungsgebäude des Geländes.",
+      "image": "bild-1.jpg",
+      "points": "200,150 250,150 250,200 200,200"
+    },
+    {
+      "id": "hotspot2",
+      "title": "Zeltplatz",
+      "text": "Hier befindet sich der große Zeltplatz mit Feuerstelle.",
+      "image": "bild-2.jpg",
+      "points": "400,300 460,310 450,370 390,360"
+    },
+{
+  "id": "hotspotXYZ",
+  "title": "Neuer Hotspot",
+  "text": "Beschreibung hier einfügen.",
+  "image": "bild.jpg",
+  "points": "542,333 556,334 570,339 575,347 567,353 549,349 544,346"
+}
+  ]
+  

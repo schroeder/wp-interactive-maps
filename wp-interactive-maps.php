@@ -143,7 +143,7 @@ function wim_register_frontend_assets() {
             'wim-map-display',
             'wimData',
             array(
-                'restUrl' => rest_url( 'wim/v1/' ),
+                'restUrl' => rest_url( 'wim/v1' ),
                 'nonce' => wp_create_nonce( 'wp_rest' ),
                 'settings' => array(
                     'markerColor' => $settings['marker_color'],
