@@ -410,39 +410,57 @@ class WIM_Meta_Boxes {
 
                 loadExistingCoordinates: function() {
                     var self = this;
-                    if (this.locationType === 'place') {
-                        var x = $('#wim_place_x').val();
-                        var y = $('#wim_place_y').val();
-                        if (x && y) {
-                            var $img = $('#wim-map-editor-image');
-                            var scaleX = $img.width() / this.mapWidth;
-                            var scaleY = $img.height() / this.mapHeight;
-                            var displayX = parseFloat(x) * scaleX;
-                            var displayY = parseFloat(y) * scaleY;
-                            this.renderPlaceMarker(displayX, displayY);
-                        }
-                    } else {
-                        var pointsJson = $('#wim_area_points').val();
-                        if (pointsJson) {
-                            try {
-                                var actualPoints = JSON.parse(pointsJson);
-                                if (Array.isArray(actualPoints) && actualPoints.length > 0) {
-                                    var $img = $('#wim-map-editor-image');
-                                    var scaleX = $img.width() / this.mapWidth;
-                                    var scaleY = $img.height() / this.mapHeight;
-                                    this.polygonPoints = actualPoints.map(function(point) {
-                                        return {
-                                            actual: point,
-                                            display: [point[0] * scaleX, point[1] * scaleY]
-                                        };
-                                    });
-                                    this.isDrawing = false;
-                                    this.renderPolygon();
+                    var $img = $('#wim-map-editor-image');
+
+                    // Wait for image to load before calculating display coordinates
+                    $img.on('load', function() {
+                        if (self.locationType === 'place') {
+                            var x = $('#wim_place_x').val();
+                            var y = $('#wim_place_y').val();
+                            if (x && y) {
+                                var imgWidth = $img.width();
+                                var imgHeight = $img.height();
+                                
+                                if (imgWidth > 0 && imgHeight > 0) {
+                                    var scaleX = imgWidth / self.mapWidth;
+                                    var scaleY = imgHeight / self.mapHeight;
+                                    var displayX = parseFloat(x) * scaleX;
+                                    var displayY = parseFloat(y) * scaleY;
+                                    self.renderPlaceMarker(displayX, displayY);
                                 }
-                            } catch (e) {
-                                console.error('Error parsing polygon points:', e);
+                            }
+                        } else {
+                            var pointsJson = $('#wim_area_points').val();
+                            if (pointsJson) {
+                                try {
+                                    var actualPoints = JSON.parse(pointsJson);
+                                    if (Array.isArray(actualPoints) && actualPoints.length > 0) {
+                                        var imgWidth = $img.width();
+                                        var imgHeight = $img.height();
+                                        
+                                        if (imgWidth > 0 && imgHeight > 0) {
+                                            var scaleX = imgWidth / self.mapWidth;
+                                            var scaleY = imgHeight / self.mapHeight;
+                                            self.polygonPoints = actualPoints.map(function(point) {
+                                                return {
+                                                    actual: point,
+                                                    display: [point[0] * scaleX, point[1] * scaleY]
+                                                };
+                                            });
+                                            self.isDrawing = false;
+                                            self.renderPolygon();
+                                        }
+                                    }
+                                } catch (e) {
+                                    console.error('Error parsing polygon points:', e);
+                                }
                             }
                         }
+                    });
+
+                    // If image is already loaded (cached), trigger load event manually
+                    if ($img[0].complete) {
+                        $img.trigger('load');
                     }
                 }
             };
