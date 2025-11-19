@@ -130,6 +130,7 @@ class WIM_Meta_Boxes {
             'wim-map-editor',
             'wimMapEditor',
             array(
+                'ajaxUrl' => admin_url( 'admin-ajax.php' ),
                 'nonce' => wp_create_nonce( 'wim_map_editor' ),
                 'i18n' => array(
                     'visualEditor' => __( 'Visual Map Editor', 'wp-interactive-maps' ),
@@ -712,26 +713,44 @@ class WIM_Meta_Boxes {
     public function ajax_get_map_data() {
         // Verify nonce
         if ( ! isset( $_POST['nonce'] ) || ! WIM_Sanitization::verify_nonce( $_POST['nonce'], 'wim_map_editor' ) ) {
-            wp_send_json_error( array( 'message' => __( 'Invalid nonce', 'wp-interactive-maps' ) ) );
+            wp_send_json_error( array( 
+                'message' => __( 'Invalid nonce', 'wp-interactive-maps' ),
+                'debug' => 'Nonce verification failed'
+            ) );
+            return;
         }
 
         // Check user permissions
         if ( ! WIM_Sanitization::user_can_edit_maps() ) {
-            wp_send_json_error( array( 'message' => __( 'Permission denied', 'wp-interactive-maps' ) ) );
+            wp_send_json_error( array( 
+                'message' => __( 'Permission denied', 'wp-interactive-maps' ),
+                'debug' => 'User lacks edit_posts capability'
+            ) );
+            return;
         }
 
         // Get map ID
         $map_id = isset( $_POST['map_id'] ) ? absint( $_POST['map_id'] ) : 0;
 
         if ( ! $map_id ) {
-            wp_send_json_error( array( 'message' => __( 'Invalid map ID', 'wp-interactive-maps' ) ) );
+            wp_send_json_error( array( 
+                'message' => __( 'Invalid map ID', 'wp-interactive-maps' ),
+                'debug' => 'Map ID is 0 or not provided'
+            ) );
+            return;
         }
 
         // Get map post
         $map = get_post( $map_id );
 
         if ( ! $map || 'wim_map' !== $map->post_type ) {
-            wp_send_json_error( array( 'message' => __( 'Map not found', 'wp-interactive-maps' ) ) );
+            wp_send_json_error( array( 
+                'message' => __( 'Map not found', 'wp-interactive-maps' ),
+                'debug' => 'Map post not found or wrong post type',
+                'map_id' => $map_id,
+                'post_type' => $map ? $map->post_type : 'null'
+            ) );
+            return;
         }
 
         // Get map meta data
@@ -740,13 +759,23 @@ class WIM_Meta_Boxes {
         $height = get_post_meta( $map_id, '_wim_map_height', true );
 
         if ( ! $image_id ) {
-            wp_send_json_error( array( 'message' => __( 'Map has no image', 'wp-interactive-maps' ) ) );
+            wp_send_json_error( array( 
+                'message' => __( 'Map has no image', 'wp-interactive-maps' ),
+                'debug' => 'No image ID found in post meta',
+                'map_id' => $map_id
+            ) );
+            return;
         }
 
         $image_url = wp_get_attachment_url( $image_id );
 
         if ( ! $image_url ) {
-            wp_send_json_error( array( 'message' => __( 'Map image not found', 'wp-interactive-maps' ) ) );
+            wp_send_json_error( array( 
+                'message' => __( 'Map image not found', 'wp-interactive-maps' ),
+                'debug' => 'Attachment URL not found',
+                'image_id' => $image_id
+            ) );
+            return;
         }
 
         // Return map data

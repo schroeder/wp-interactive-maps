@@ -38,6 +38,7 @@
 
             // Listen for map selection changes
             $('#wim_location_map_id').on('change', function() {
+                console.log('WIM Map Editor: Map selection changed to:', $(this).val());
                 self.loadMapImage();
             });
 
@@ -79,7 +80,7 @@
 
             // Fetch map data via AJAX
             $.ajax({
-                url: ajaxurl,
+                url: wimMapEditor.ajaxUrl || ajaxurl,
                 type: 'POST',
                 data: {
                     action: 'wim_get_map_data',
@@ -94,10 +95,12 @@
                         self.mapHeight = response.data.height;
                         self.renderMapEditor();
                     } else {
+                        console.error('Map data error:', response);
                         self.hideMapEditor();
                     }
                 },
-                error: function() {
+                error: function(xhr, status, error) {
+                    console.error('AJAX error:', status, error);
                     self.hideMapEditor();
                 }
             });
@@ -390,7 +393,10 @@
     $(document).ready(function() {
         // Only initialize if we're on the location edit screen
         if ($('#wim_location_map_id').length) {
+            console.log('WIM Map Editor: Initializing...');
             MapEditor.init();
+        } else {
+            console.log('WIM Map Editor: Map select field not found');
         }
     });
 
