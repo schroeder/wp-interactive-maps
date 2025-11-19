@@ -407,6 +407,13 @@ if (typeof window !== 'undefined') {
  * Auto-initialize maps from Gutenberg blocks and shortcodes
  */
 document.addEventListener('DOMContentLoaded', function() {
+  // Apply custom CSS if provided
+  if (window.wimData?.settings?.customCss) {
+    const style = document.createElement('style');
+    style.textContent = window.wimData.settings.customCss;
+    document.head.appendChild(style);
+  }
+  
   // Find all map containers with data attributes
   const mapContainers = document.querySelectorAll('.wim-map-container[data-map-id]');
   

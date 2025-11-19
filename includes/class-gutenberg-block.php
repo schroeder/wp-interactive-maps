@@ -27,8 +27,40 @@ class WIM_Gutenberg_Block {
      * Register the interactive map Gutenberg block.
      */
     public function register_block() {
-        // Register the block using block.json
-        register_block_type( WIM_PLUGIN_DIR . 'blocks/map-block' );
+        // Register the block using block.json with render callback
+        register_block_type( WIM_PLUGIN_DIR . 'blocks/map-block', array(
+            'render_callback' => array( $this, 'render_block' ),
+        ) );
+    }
+    
+    /**
+     * Render the block on the frontend.
+     *
+     * @param array $attributes Block attributes.
+     * @return string Block HTML output.
+     */
+    public function render_block( $attributes ) {
+        $map_id = isset( $attributes['mapId'] ) ? absint( $attributes['mapId'] ) : 0;
+        $layout = isset( $attributes['layout'] ) ? sanitize_text_field( $attributes['layout'] ) : 'side';
+        
+        // Don't render if no map is selected
+        if ( ! $map_id ) {
+            return '';
+        }
+        
+        // Enqueue frontend assets
+        wp_enqueue_style( 'wim-map-display' );
+        wp_enqueue_script( 'wim-map-display' );
+        
+        // Use the shortcode class to render the map
+        if ( class_exists( 'WIM_Shortcode' ) ) {
+            return WIM_Shortcode::render_map( array(
+                'id' => $map_id,
+                'layout' => $layout,
+            ) );
+        }
+        
+        return '';
     }
 }
 

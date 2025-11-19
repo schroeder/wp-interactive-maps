@@ -115,12 +115,10 @@ function wim_enqueue_admin_assets( $hook ) {
 add_action( 'admin_enqueue_scripts', 'wim_enqueue_admin_assets' );
 
 /**
- * Enqueue frontend scripts and styles.
- * Only enqueues when needed (on pages with maps).
+ * Register frontend scripts and styles.
+ * Only registers assets - they will be enqueued when needed.
  */
-function wim_enqueue_frontend_assets() {
-    // Check if we're on a page that might have maps
-    // This will be called by shortcode/block when needed
+function wim_register_frontend_assets() {
     if ( ! is_admin() ) {
         wp_register_style(
             'wim-map-display',
@@ -153,14 +151,10 @@ function wim_enqueue_frontend_assets() {
                     'areaStrokeColor' => $settings['area_stroke_color'],
                     'areaFillOpacity' => $settings['area_fill_opacity'] / 100,
                     'defaultLayout' => $settings['default_layout'],
+                    'customCss' => ! empty( $settings['custom_css'] ) ? $settings['custom_css'] : '',
                 )
             )
         );
-        
-        // Add custom CSS if provided
-        if ( ! empty( $settings['custom_css'] ) ) {
-            wp_add_inline_style( 'wim-map-display', $settings['custom_css'] );
-        }
     }
 }
-add_action( 'wp_enqueue_scripts', 'wim_enqueue_frontend_assets' );
+add_action( 'wp_enqueue_scripts', 'wim_register_frontend_assets' );
