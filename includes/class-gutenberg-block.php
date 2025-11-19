@@ -20,7 +20,8 @@ class WIM_Gutenberg_Block {
      * Initialize the class.
      */
     public function __construct() {
-        add_action( 'init', array( $this, 'register_block' ) );
+        // Temporarily disabled until block assets are built
+        // add_action( 'init', array( $this, 'register_block' ) );
     }
     
     /**
