@@ -38,8 +38,8 @@ class InteractiveMap {
     try {
       await this.loadMapData();
       this.renderMap();
-      this.renderLocations();
-      this.setupEventListeners();
+      // Note: renderLocations() and setupEventListeners() are called
+      // after the map image loads in setupSVGOverlay()
     } catch (error) {
       console.error('Failed to initialize interactive map:', error);
       this.showError('Failed to load map. Please try again later.');
@@ -125,6 +125,9 @@ class InteractiveMap {
     
     // Render locations after SVG is ready
     this.renderLocations();
+    
+    // Setup event listeners after locations are rendered
+    this.setupEventListeners();
   }
 
   /**
@@ -243,23 +246,28 @@ class InteractiveMap {
    */
   setupEventListeners() {
     if (!this.svg) {
+      console.warn('Cannot setup event listeners: SVG not found');
       return;
     }
 
     // Add click handlers to all markers and areas
     const markers = this.svg.querySelectorAll('.wim-marker');
+    console.log(`Setting up event listeners for ${markers.length} markers`);
     markers.forEach(marker => {
       marker.addEventListener('click', (e) => {
         e.stopPropagation();
+        console.log('Marker clicked:', marker.locationData);
         this.showLocationContent(marker.locationData);
       });
     });
 
     const areas = this.svg.querySelectorAll('.wim-area');
+    console.log(`Setting up event listeners for ${areas.length} areas`);
     areas.forEach(area => {
       // Click handler
       area.addEventListener('click', (e) => {
         e.stopPropagation();
+        console.log('Area clicked:', area.locationData);
         this.showLocationContent(area.locationData);
       });
 
@@ -286,7 +294,11 @@ class InteractiveMap {
    * Show location content in panel
    */
   showLocationContent(location) {
+    console.log('showLocationContent called with:', location);
+    console.log('contentPanel exists:', !!this.contentPanel);
+    
     if (!location || !this.contentPanel) {
+      console.warn('Cannot show location content: missing location or contentPanel');
       return;
     }
 

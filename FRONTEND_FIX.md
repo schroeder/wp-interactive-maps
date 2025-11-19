@@ -16,6 +16,9 @@ The `wimData` object wasn't being properly localized with the settings data (mar
 ### 4. Localization Timing Issue
 The main plugin file was calling `wp_localize_script()` on a registered but not yet enqueued script, which doesn't work properly in WordPress.
 
+### 5. Event Listener Timing Issue (CRITICAL)
+The event listeners were being set up in `init()` before the map image loaded and the SVG overlay was created. This meant click handlers were never attached to the polygons and markers.
+
 ## Changes Made
 
 ### 1. Fixed Shortcode Class (`includes/class-shortcode.php`)
@@ -28,6 +31,12 @@ The main plugin file was calling `wp_localize_script()` on a registered but not 
 - Created new `wim_localize_frontend_script()` function that runs after scripts are enqueued
 - Added check to only localize if script is actually enqueued
 - Properly converts opacity from percentage (30) to decimal (0.3)
+
+### 3. Fixed Event Listener Timing (`public/js/map-display.js`)
+- Moved `setupEventListeners()` call from `init()` to `setupSVGOverlay()`
+- Event listeners are now attached AFTER the SVG overlay is created and locations are rendered
+- Added console logging for debugging
+- This ensures click handlers are properly attached to all markers and areas
 
 ## How It Works Now
 
