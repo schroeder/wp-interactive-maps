@@ -73,32 +73,11 @@ class WIM_Shortcode {
         // Enqueue frontend assets
         $this->enqueue_assets();
 
-        // Generate unique container ID
-        $container_id = 'wim-map-' . $validated_map_id . '-' . uniqid();
-
-        // Build HTML output
+        // Build HTML output - use wim-map-container class for auto-initialization
         $output = sprintf(
-            '<div id="%s" class="wim-container" data-map-id="%d" data-layout="%s"></div>',
-            esc_attr( $container_id ),
+            '<div class="wim-map-container" data-map-id="%d" data-layout="%s"></div>',
             esc_attr( $validated_map_id ),
             esc_attr( $layout )
-        );
-
-        // Add initialization script
-        $output .= sprintf(
-            '<script>
-            document.addEventListener("DOMContentLoaded", function() {
-                if (typeof InteractiveMap !== "undefined" && typeof wimData !== "undefined") {
-                    new InteractiveMap("%s", %d, {
-                        layout: "%s",
-                        apiUrl: wimData.restUrl
-                    }).init();
-                }
-            });
-            </script>',
-            esc_js( $container_id ),
-            esc_js( $validated_map_id ),
-            esc_js( $layout )
         );
 
         return $output;
@@ -108,30 +87,9 @@ class WIM_Shortcode {
      * Enqueue frontend CSS and JavaScript.
      */
     private function enqueue_assets() {
-        wp_enqueue_style(
-            'wim-map-display',
-            WIM_PLUGIN_URL . 'public/css/map-display.css',
-            array(),
-            WIM_VERSION
-        );
-
-        wp_enqueue_script(
-            'wim-map-display',
-            WIM_PLUGIN_URL . 'public/js/map-display.js',
-            array(),
-            WIM_VERSION,
-            true
-        );
-
-        // Localize script with REST API URL
-        wp_localize_script(
-            'wim-map-display',
-            'wimData',
-            array(
-                'restUrl' => rest_url( 'wim/v1' ),
-                'nonce'   => wp_create_nonce( 'wp_rest' ),
-            )
-        );
+        // Just enqueue the assets - localization is handled in the main plugin file
+        wp_enqueue_style( 'wim-map-display' );
+        wp_enqueue_script( 'wim-map-display' );
     }
 
     /**

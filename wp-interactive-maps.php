@@ -126,7 +126,16 @@ function wim_register_frontend_assets() {
             WIM_VERSION,
             true
         );
-        
+    }
+}
+add_action( 'wp_enqueue_scripts', 'wim_register_frontend_assets', 5 );
+
+/**
+ * Localize frontend script data.
+ * This runs after scripts are enqueued to ensure localization works properly.
+ */
+function wim_localize_frontend_script() {
+    if ( ! is_admin() && wp_script_is( 'wim-map-display', 'enqueued' ) ) {
         // Get plugin settings
         $settings = WIM_Settings::get_settings();
         
@@ -149,4 +158,4 @@ function wim_register_frontend_assets() {
         );
     }
 }
-add_action( 'wp_enqueue_scripts', 'wim_register_frontend_assets' );
+add_action( 'wp_enqueue_scripts', 'wim_localize_frontend_script', 20 );
