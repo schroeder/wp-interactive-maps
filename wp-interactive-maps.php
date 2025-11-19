@@ -103,14 +103,6 @@ function wim_enqueue_admin_assets( $hook ) {
         array(),
         WIM_VERSION
     );
-    
-    wp_enqueue_script(
-        'wim-map-editor',
-        WIM_PLUGIN_URL . 'admin/js/map-editor.js',
-        array( 'jquery' ),
-        WIM_VERSION,
-        true
-    );
 }
 add_action( 'admin_enqueue_scripts', 'wim_enqueue_admin_assets' );
 
