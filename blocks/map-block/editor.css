@@ -1,0 +1,126 @@
+/**
+ * Editor styles for Interactive Map block
+ */
+
+.wim-block-editor {
+  min-height: 200px;
+}
+
+.wim-block-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: #f0f0f1;
+  border: 2px dashed #c3c4c7;
+  border-radius: 4px;
+  text-align: center;
+  min-height: 200px;
+}
+
+.wim-block-placeholder-icon {
+  margin-bottom: 16px;
+}
+
+.wim-block-placeholder-icon .dashicons {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  color: #1e1e1e;
+}
+
+.wim-block-placeholder h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.wim-block-placeholder p {
+  margin: 0;
+  color: #757575;
+  font-size: 14px;
+}
+
+.wim-block-loading,
+.wim-block-error {
+  padding: 40px 20px;
+  text-align: center;
+  background: #f0f0f1;
+  border-radius: 4px;
+}
+
+.wim-block-error {
+  background: #fcf0f1;
+  color: #cc1818;
+}
+
+.wim-block-preview {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.wim-block-preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #f0f0f1;
+  border-bottom: 1px solid #ddd;
+}
+
+.wim-block-preview-header h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.wim-block-preview-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  background: #2271b1;
+  color: #fff;
+  font-size: 12px;
+  border-radius: 3px;
+}
+
+.wim-block-preview-image {
+  position: relative;
+  background: #f0f0f1;
+}
+
+.wim-block-preview-image img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 400px;
+  object-fit: contain;
+}
+
+.wim-block-preview-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.wim-block-preview-info {
+  padding: 12px 16px;
+  background: #f9f9f9;
+  border-top: 1px solid #ddd;
+}
+
+.wim-block-preview-info p {
+  margin: 0;
+  font-size: 13px;
+  color: #757575;
+}

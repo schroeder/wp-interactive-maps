@@ -1,0 +1,30 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "wim/interactive-map",
+  "title": "Interactive Map",
+  "category": "widgets",
+  "icon": "location-alt",
+  "description": "Display an interactive map with clickable locations",
+  "keywords": ["map", "interactive", "location"],
+  "version": "1.0.0",
+  "textdomain": "wp-interactive-maps",
+  "attributes": {
+    "mapId": {
+      "type": "number",
+      "default": 0
+    },
+    "layout": {
+      "type": "string",
+      "default": "side",
+      "enum": ["side", "popup"]
+    }
+  },
+  "supports": {
+    "html": false,
+    "align": ["wide", "full"]
+  },
+  "editorScript": "file:./edit.js",
+  "editorStyle": "file:./editor.css",
+  "script": "file:./save.js"
+}

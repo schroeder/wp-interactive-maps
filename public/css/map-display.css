@@ -1,0 +1,286 @@
+/**
+ * WordPress Interactive Maps - Frontend Styles
+ * Styles for the interactive map display component
+ */
+
+/* Container Styles */
+.wim-container {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+.wim-container.wim-layout-side {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.wim-container.wim-layout-popup {
+  display: block;
+}
+
+/* Map Wrapper */
+.wim-map-wrapper {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  background: #f5f5f5;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.wim-layout-popup .wim-map-wrapper {
+  width: 100%;
+}
+
+/* Map Image */
+.wim-map-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+}
+
+/* SVG Overlay */
+.wim-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.wim-overlay > * {
+  pointer-events: auto;
+}
+
+/* Marker Styles */
+.wim-marker {
+  transition: transform 0.2s ease;
+}
+
+.wim-marker:hover {
+  transform: scale(1.2);
+}
+
+.wim-marker.wim-active .wim-marker-circle {
+  stroke-width: 3;
+  filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.5));
+}
+
+.wim-marker-hover {
+  transition: fill 0.2s ease;
+}
+
+.wim-marker:hover .wim-marker-hover {
+  fill: rgba(0, 0, 0, 0.1);
+}
+
+/* Area Styles */
+.wim-area {
+  transition: opacity 0.2s ease;
+}
+
+.wim-area-polygon {
+  transition: fill-opacity 0.2s ease, stroke-width 0.2s ease;
+}
+
+.wim-area:hover .wim-area-polygon {
+  stroke-width: 3;
+}
+
+.wim-area.wim-active .wim-area-polygon {
+  stroke-width: 3;
+  filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.5));
+}
+
+/* Content Panel */
+.wim-content-panel {
+  background: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.wim-layout-side .wim-content-panel {
+  width: 350px;
+  max-width: 100%;
+  flex-shrink: 0;
+  position: sticky;
+  top: 20px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+}
+
+.wim-layout-popup .wim-content-panel {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+/* Content Header */
+.wim-content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 20px;
+  border-bottom: 1px solid #eee;
+  background: #f9f9f9;
+}
+
+.wim-content-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  flex: 1;
+  padding-right: 10px;
+}
+
+.wim-close-button {
+  background: transparent;
+  border: none;
+  font-size: 28px;
+  line-height: 1;
+  color: #666;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.wim-close-button:hover {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.wim-close-button:focus {
+  outline: 2px solid #0073aa;
+  outline-offset: 2px;
+}
+
+/* Content Body */
+.wim-content-body {
+  padding: 20px;
+}
+
+.wim-content-description {
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.wim-content-description p:first-child {
+  margin-top: 0;
+}
+
+.wim-content-description p:last-child {
+  margin-bottom: 0;
+}
+
+/* Content Images */
+.wim-content-images {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.wim-content-image {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+/* Error Message */
+.wim-error {
+  padding: 20px;
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  color: #721c24;
+  text-align: center;
+}
+
+.wim-error p {
+  margin: 0;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .wim-container.wim-layout-side {
+    flex-direction: column;
+  }
+
+  .wim-layout-side .wim-content-panel {
+    width: 100%;
+    position: static;
+    max-height: none;
+  }
+
+  .wim-layout-popup .wim-content-panel {
+    width: 95%;
+    max-height: 90vh;
+  }
+
+  .wim-content-header {
+    padding: 15px;
+  }
+
+  .wim-content-title {
+    font-size: 18px;
+  }
+
+  .wim-content-body {
+    padding: 15px;
+  }
+
+  .wim-content-images {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+
+  .wim-content-image {
+    height: 120px;
+  }
+}
+
+/* Accessibility */
+.wim-marker:focus,
+.wim-area:focus {
+  outline: 2px solid #0073aa;
+  outline-offset: 2px;
+}
+
+/* Print Styles */
+@media print {
+  .wim-content-panel {
+    position: static !important;
+    transform: none !important;
+    box-shadow: none;
+    border: 1px solid #000;
+    page-break-inside: avoid;
+  }
+
+  .wim-close-button {
+    display: none;
+  }
+}
