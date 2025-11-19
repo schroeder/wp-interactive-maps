@@ -60,24 +60,26 @@
 
 /* Marker Styles */
 .wim-marker {
-  transition: transform 0.2s ease;
+  cursor: pointer;
 }
 
-.wim-marker:hover {
-  transform: scale(1.2);
+.wim-marker-hitarea {
+  pointer-events: all;
+}
+
+.wim-marker-circle {
+  transition: stroke-width 0.2s ease, filter 0.2s ease;
+  pointer-events: none;
+}
+
+.wim-marker:hover .wim-marker-circle {
+  stroke-width: 3;
+  filter: brightness(1.2);
 }
 
 .wim-marker.wim-active .wim-marker-circle {
-  stroke-width: 3;
+  stroke-width: 4;
   filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.5));
-}
-
-.wim-marker-hover {
-  transition: fill 0.2s ease;
-}
-
-.wim-marker:hover .wim-marker-hover {
-  fill: rgba(0, 0, 0, 0.1);
 }
 
 /* Area Styles */

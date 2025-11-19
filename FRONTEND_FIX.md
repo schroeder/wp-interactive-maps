@@ -38,6 +38,13 @@ The event listeners were being set up in `init()` before the map image loaded an
 - Added console logging for debugging
 - This ensures click handlers are properly attached to all markers and areas
 
+### 4. Fixed Marker Hover Jumping (`public/js/map-display.js` & `public/css/map-display.css`)
+- Removed problematic `transform: scale()` hover effect that caused markers to jump
+- Created separate invisible hit area (15px radius) for easier clicking
+- Set `pointer-events: none` on the visible marker circle to prevent event conflicts
+- Used `stroke-width` and `filter: brightness()` for subtle hover feedback
+- Markers now stay in place when hovering and are easier to click
+
 ## How It Works Now
 
 1. Scripts are registered early (priority 5)

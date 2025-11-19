@@ -171,6 +171,15 @@ class InteractiveMap {
     group.setAttribute('data-location-id', location.id);
     group.style.cursor = 'pointer';
 
+    // Create larger invisible circle for easier clicking
+    const hitArea = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    hitArea.setAttribute('cx', x);
+    hitArea.setAttribute('cy', y);
+    hitArea.setAttribute('r', '15');
+    hitArea.setAttribute('fill', 'transparent');
+    hitArea.setAttribute('stroke', 'none');
+    hitArea.setAttribute('class', 'wim-marker-hitarea');
+
     // Create marker circle
     const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
     circle.setAttribute('cx', x);
@@ -180,16 +189,9 @@ class InteractiveMap {
     circle.setAttribute('stroke', '#ffffff');
     circle.setAttribute('stroke-width', '2');
     circle.setAttribute('class', 'wim-marker-circle');
+    circle.style.pointerEvents = 'none';
 
-    // Create outer circle for hover effect
-    const outerCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    outerCircle.setAttribute('cx', x);
-    outerCircle.setAttribute('cy', y);
-    outerCircle.setAttribute('r', '12');
-    outerCircle.setAttribute('fill', 'transparent');
-    outerCircle.setAttribute('class', 'wim-marker-hover');
-
-    group.appendChild(outerCircle);
+    group.appendChild(hitArea);
     group.appendChild(circle);
     
     // Store location data
