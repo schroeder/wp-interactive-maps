@@ -48,19 +48,12 @@ class WIM_Gutenberg_Block {
             return '';
         }
         
-        // Enqueue frontend assets
-        wp_enqueue_style( 'wim-map-display' );
-        wp_enqueue_script( 'wim-map-display' );
-        
-        // Use the shortcode class to render the map
-        if ( class_exists( 'WIM_Shortcode' ) ) {
-            return WIM_Shortcode::render_map( array(
-                'id' => $map_id,
-                'layout' => $layout,
-            ) );
-        }
-        
-        return '';
+        // Use WordPress do_shortcode to render the map
+        return do_shortcode( sprintf(
+            '[interactive_map id="%d" layout="%s"]',
+            $map_id,
+            $layout
+        ) );
     }
 }
 
